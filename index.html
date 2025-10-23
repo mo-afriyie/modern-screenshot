@@ -182,13 +182,15 @@
         <div id="content-to-capture" class="content-to-capture">
           <h2>Sample Content with Images</h2>
           <p>
-            This content includes an external image that will be handled
+            This content includes an external image with
+            <code>crossorigin="anonymous"</code> that will be handled
             differently based on the export method:
           </p>
           <img
-            src="https://images.unsplash.com/photo-1761165307483-8f293ad3f1e9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900"
+            src="https://proxima.creativeos.com/api/proxy-media?url=https%3A%2F%2Feditor.coscdn.net%2Fuploads%2F29aa727a-bd65-4fde-b2ff-f7b461d54632-image.png"
             alt="Beautiful landscape"
             class="sample-image"
+            crossorigin="anonymous"
           />
           <p>🎨 Beautiful content ready for capture!</p>
         </div>
@@ -313,7 +315,7 @@
             );
 
             // Show size comparison
-            const sizeInfo = `Size: ${htmlOutput.length} characters\nImages: Original URLs preserved (smaller output)\n✅ Downloaded as: clean-export-${timestamp}.html`;
+            const sizeInfo = `Size: ${htmlOutput.length} characters\nImages: Original URLs preserved (smaller output)\nCORS: crossorigin attributes removed for compatibility\n✅ Downloaded as: clean-export-${timestamp}.html`;
             displayResult("Export Info", sizeInfo);
           } catch (error) {
             console.error("❌ Clean HTML export failed:", error);

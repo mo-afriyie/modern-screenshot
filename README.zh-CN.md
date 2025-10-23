@@ -18,7 +18,7 @@
   </a>
 </p>
 
-<p align="center">使用 HTML5 canvas 和 SVG 从 DOM 节点快速生成图像</p>
+<p align="center">使用 HTML5 canvas 和 SVG 从 DOM 节点快速生成图像或 HTML</p>
 
 <p align="center">Fork from <a href="https://github.com/bubkoo/html-to-image">html-to-image</a></p>
 
@@ -33,12 +33,23 @@ npm i modern-screenshot
 ## 🦄 使用
 
 ```ts
-import { domToPng } from 'modern-screenshot'
+import { domToHtml, domToPng } from 'modern-screenshot'
 
-domToPng(document.querySelector('#app')).then(dataUrl => {
+// 导出为 PNG 图像
+domToPng(document.querySelector('#app')).then((dataUrl) => {
   const link = document.createElement('a')
   link.download = 'screenshot.png'
   link.href = dataUrl
+  link.click()
+})
+
+// 导出为干净的 HTML（新功能！）
+domToHtml(document.querySelector('#app')).then((html) => {
+  const blob = new Blob([html], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'export.html'
   link.click()
 })
 ```
@@ -67,7 +78,7 @@ domToPng(document.querySelector('#app')).then(dataUrl => {
 
   ```js
   const script = document.createElement('script')
-  script.src = "https://unpkg.com/modern-screenshot"
+  script.src = 'https://unpkg.com/modern-screenshot'
   document.getElementsByTagName('head')[0].appendChild(script)
 
   script.onload = () => {
@@ -75,16 +86,16 @@ domToPng(document.querySelector('#app')).then(dataUrl => {
       .domToImage(document.querySelector('body'), {
         debug: true,
         progress: (current, total) => {
-          console.log(`${ current }/${ total }`)
+          console.log(`${current}/${total}`)
         }
       })
-      .then(img => {
+      .then((img) => {
         const width = 600
         const height = img.height * (width / img.width)
         console.log('%c ', [
-          `padding: 0 ${ width / 2 }px;`,
-          `line-height: ${ height }px;`,
-          `background-image: url('${ img.src }');`,
+          `padding: 0 ${width / 2}px;`,
+          `line-height: ${height}px;`,
+          `background-image: url('${img.src}');`,
           `background-size: 100% 100%;`,
         ].join(''))
       })
@@ -125,9 +136,9 @@ DOM 转 HTMLElement
 通过重用上下文和 web worker，每秒快速截图
 
 ```ts
+import { createContext, destroyContext, domToPng } from 'modern-screenshot'
 // use vite
 import workerUrl from 'modern-screenshot/worker?url'
-import { createContext, destroyContext, domToPng } from 'modern-screenshot'
 
 async function screenshotsPerSecond() {
   const context = await createContext(document.querySelector('#app'), {
@@ -135,9 +146,9 @@ async function screenshotsPerSecond() {
     workerNumber: 1,
   })
   for (let i = 0; i < 10; i++) {
-    domToPng(context).then(dataUrl => {
+    domToPng(context).then((dataUrl) => {
       const link = document.createElement('a')
-      link.download = `screenshot-${ i + 1 }.png`
+      link.download = `screenshot-${i + 1}.png`
       link.href = dataUrl
       link.click()
       if (i + 1 === 10) {

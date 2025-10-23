@@ -18,6 +18,9 @@ export function embedImageElement<T extends HTMLImageElement | SVGImageElement>(
     if (!isDataUrl(originalSrc)) {
       // Skip embedding if embedImages is disabled
       if (!context.embedImages) {
+        // Remove CORS-related attributes that might cause issues with original URLs
+        cloned.removeAttribute('crossorigin')
+        cloned.removeAttribute('crossOrigin')
         return []
       }
       return [
@@ -45,6 +48,11 @@ export function embedImageElement<T extends HTMLImageElement | SVGImageElement>(
 
     // Skip embedding if embedImages is disabled
     if (!context.embedImages) {
+      // Remove CORS-related attributes that might cause issues with original URLs
+      if ('removeAttribute' in cloned) {
+        cloned.removeAttribute('crossorigin')
+        cloned.removeAttribute('crossOrigin')
+      }
       return []
     }
 
