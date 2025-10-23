@@ -82,9 +82,7 @@ export interface Options {
    * @param url
    * @returns A data URL for the image
    */
-  fetchFn?: ((
-    url: string,
-  ) => Promise<string | false>) | null
+  fetchFn?: ((url: string) => Promise<string | false>) | null
 
   /**
    * The options of fetch resources.
@@ -114,71 +112,86 @@ export interface Options {
      *
      * default: data:image/png;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
      */
-    placeholderImage?: string | ((cloned: HTMLImageElement | SVGImageElement) => string | Promise<string>)
+    placeholderImage?:
+      | string
+      | ((
+        cloned: HTMLImageElement | SVGImageElement
+      ) => string | Promise<string>)
   }
 
   /**
    * The options of fonts download and embed.
    */
-  font?: false | {
-    /**
-     * Font minify
-     */
-    minify?: (font: ArrayBuffer, subset: string) => ArrayBuffer
+  font?:
+    | false
+    | {
+      /**
+       * Font minify
+       */
+      minify?: (font: ArrayBuffer, subset: string) => ArrayBuffer
 
-    /**
-     * The preferred font format. If specified all other font formats are ignored.
-     */
-    preferredFormat?: 'woff' | 'woff2' | 'truetype' | 'opentype' | 'embedded-opentype' | 'svg' | string
+      /**
+       * The preferred font format. If specified all other font formats are ignored.
+       */
+      preferredFormat?:
+        | 'woff'
+        | 'woff2'
+        | 'truetype'
+        | 'opentype'
+        | 'embedded-opentype'
+        | 'svg'
+        | string
 
-    /**
-     * A CSS string to specify for font embeds. If specified only this CSS will
-     * be present in the resulting image.
-     */
-    cssText?: string
-  }
+      /**
+       * A CSS string to specify for font embeds. If specified only this CSS will
+       * be present in the resulting image.
+       */
+      cssText?: string
+    }
 
   /**
    * All enabled features
    *
    * default: true
    */
-  features?: boolean | {
-    /**
-     * Copy scrollbar css styles
-     *
-     * default: true
-     */
-    copyScrollbar?: boolean
+  features?:
+    | boolean
+    | {
+      /**
+       * Copy scrollbar css styles
+       *
+       * default: true
+       */
+      copyScrollbar?: boolean
 
-    /**
-     * Remove abnormal attributes to cloned node (for normalize XML)
-     *
-     * default: true
-     */
-    removeAbnormalAttributes?: boolean
+      /**
+       * Remove abnormal attributes to cloned node (for normalize XML)
+       *
+       * default: true
+       */
+      removeAbnormalAttributes?: boolean
 
-    /**
-     * Remove control characters (for normalize XML)
-     *
-     * default: true
-     */
-    removeControlCharacter?: boolean
+      /**
+       * Remove control characters (for normalize XML)
+       *
+       * default: true
+       */
+      removeControlCharacter?: boolean
 
-    /**
-     * Fix svg+xml image decode (for Safari、Firefox)
-     *
-     * default: true
-     */
-    fixSvgXmlDecode?: boolean
+      /**
+       * Fix svg+xml image decode (for Safari、Firefox)
+       *
+       * default: true
+       */
+      fixSvgXmlDecode?: boolean
 
-    /**
-     * Render scrolled children with scrolled content
-     *
-     * default: false
-     */
-    restoreScrollPosition?: boolean
-  }
+      /**
+       * Render scrolled children with scrolled content
+       *
+       * default: false
+       */
+      restoreScrollPosition?: boolean
+    }
 
   /**
    * Canvas `drawImage` interval
@@ -216,7 +229,9 @@ export interface Options {
   /**
    * Triggered after a ForeignObjectSvg is created
    */
-  onCreateForeignObjectSvg?: ((svg: SVGSVGElement) => void | Promise<void>) | null
+  onCreateForeignObjectSvg?:
+    | ((svg: SVGSVGElement) => void | Promise<void>)
+    | null
 
   /**
    * An array of style property names.
@@ -225,4 +240,12 @@ export interface Options {
    * This can be useful for performance-critical scenarios.
    */
   includeStyleProperties?: string[] | null
+
+  /**
+   * Whether to embed images as data URLs.
+   * When set to false, preserves original image URLs for smaller HTML output.
+   *
+   * default: true
+   */
+  embedImages?: boolean
 }

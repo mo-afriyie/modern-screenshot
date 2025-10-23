@@ -14,6 +14,11 @@ export function embedCssStyleImage(
   style: CSSStyleDeclaration,
   context: Context,
 ): Promise<void>[] {
+  // Skip CSS image embedding if embedImages is disabled
+  if (!context.embedImages) {
+    return []
+  }
+
   return properties
     .map((property) => {
       const value = style.getPropertyValue(property)
@@ -23,15 +28,17 @@ export function embedCssStyleImage(
       if (IN_SAFARI || IN_FIREFOX) {
         context.drawImageCount++
       }
-      return replaceCssUrlToDataUrl(value, null, context, true).then((newValue) => {
-        if (!newValue || value === newValue)
-          return
-        style.setProperty(
-          property,
-          newValue,
-          style.getPropertyPriority(property),
-        )
-      })
+      return replaceCssUrlToDataUrl(value, null, context, true).then(
+        (newValue) => {
+          if (!newValue || value === newValue)
+            return
+          style.setProperty(
+            property,
+            newValue,
+            style.getPropertyPriority(property),
+          )
+        },
+      )
     })
     .filter(Boolean) as Promise<void>[]
 }

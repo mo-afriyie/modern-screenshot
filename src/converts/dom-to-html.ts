@@ -11,7 +11,9 @@ export async function domToHtml<T extends Node>(
   context: Context<T>
 ): Promise<string>
 export async function domToHtml(node: any, options?: any): Promise<string> {
-  const context = await orCreateContext(node, options)
+  // Default to not embedding images for HTML export to keep it clean and smaller
+  const htmlOptions = { embedImages: false, ...options }
+  const context = await orCreateContext(node, htmlOptions)
 
   const svg = await domToForeignObjectSvg(context)
   const foreignObject = svg.querySelector('foreignObject')

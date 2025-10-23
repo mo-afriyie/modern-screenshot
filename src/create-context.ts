@@ -12,20 +12,35 @@ import {
   XMLNS,
 } from './utils'
 
-export async function orCreateContext<T extends Node>(context: Context<T>): Promise<Context<T>>
-export async function orCreateContext<T extends Node>(node: T, options?: Options): Promise<Context<T>>
-export async function orCreateContext(node: any, options?: Options): Promise<Context> {
-  return isContext(node) ? node : createContext(node, { ...options, autoDestruct: true })
+export async function orCreateContext<T extends Node>(
+  context: Context<T>
+): Promise<Context<T>>
+export async function orCreateContext<T extends Node>(
+  node: T,
+  options?: Options
+): Promise<Context<T>>
+export async function orCreateContext(
+  node: any,
+  options?: Options,
+): Promise<Context> {
+  return isContext(node)
+    ? node
+    : createContext(node, { ...options, autoDestruct: true })
 }
 
-export async function createContext<T extends Node>(node: T, options?: Options & { autoDestruct?: boolean }): Promise<Context<T>> {
+export async function createContext<T extends Node>(
+  node: T,
+  options?: Options & { autoDestruct?: boolean },
+): Promise<Context<T>> {
   const { scale = 1, workerUrl, workerNumber = 1 } = options || {}
 
   const debug = Boolean(options?.debug)
   const features = options?.features ?? true
 
-  const ownerDocument = node.ownerDocument ?? (IN_BROWSER ? window.document : undefined)
-  const ownerWindow = node.ownerDocument?.defaultView ?? (IN_BROWSER ? window : undefined)
+  const ownerDocument
+    = node.ownerDocument ?? (IN_BROWSER ? window.document : undefined)
+  const ownerWindow
+    = node.ownerDocument?.defaultView ?? (IN_BROWSER ? window : undefined)
   const requests = new Map<string, Request>()
 
   const context: Context<T> = {
@@ -44,7 +59,8 @@ export async function createContext<T extends Node>(node: T, options?: Options &
     debug,
     fetch: {
       requestInit: getDefaultRequestInit(options?.fetch?.bypassingCache),
-      placeholderImage: 'data:image/png;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+      placeholderImage:
+        'data:image/png;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
       bypassingCache: false,
       ...options?.fetch,
     },
@@ -58,6 +74,7 @@ export async function createContext<T extends Node>(node: T, options?: Options &
     onEmbedNode: null,
     onCreateForeignObjectSvg: null,
     includeStyleProperties: null,
+    embedImages: true,
     autoDestruct: false,
     ...options,
 
@@ -74,33 +91,42 @@ export async function createContext<T extends Node>(node: T, options?: Options &
     defaultComputedStyles: new Map(),
     workers: [
       ...Array.from({
-        length: SUPPORT_WEB_WORKER && workerUrl && workerNumber
-          ? workerNumber
-          : 0,
+        length:
+          SUPPORT_WEB_WORKER && workerUrl && workerNumber ? workerNumber : 0,
       }),
-    ].map(() => {
-      try {
-        const worker = new Worker(workerUrl!)
-        worker.onmessage = async (event) => {
-          const { url, result } = event.data
-          if (result) {
-            requests.get(url)?.resolve?.(result)
+    ]
+      .map(() => {
+        try {
+          const worker = new Worker(workerUrl!)
+          worker.onmessage = async (event) => {
+            const { url, result } = event.data
+            if (result) {
+              requests.get(url)?.resolve?.(result)
+            }
+            else {
+              requests
+                .get(url)
+                ?.reject?.(
+                  new Error(`Error receiving message from worker: ${url}`),
+                )
+            }
           }
-          else {
-            requests.get(url)?.reject?.(new Error(`Error receiving message from worker: ${url}`))
+          worker.onmessageerror = (event) => {
+            const { url } = event.data
+            requests
+              .get(url)
+              ?.reject?.(
+                new Error(`Error receiving message from worker: ${url}`),
+              )
           }
+          return worker
         }
-        worker.onmessageerror = (event) => {
-          const { url } = event.data
-          requests.get(url)?.reject?.(new Error(`Error receiving message from worker: ${url}`))
+        catch (error) {
+          context.log.warn('Failed to new Worker', error)
+          return null
         }
-        return worker
-      }
-      catch (error) {
-        context.log.warn('Failed to new Worker', error)
-        return null
-      }
-    }).filter(Boolean) as any,
+      })
+      .filter(Boolean) as any,
     fontFamilies: new Map(),
     fontCssTexts: new Map(),
     acceptOfImage: `${[
@@ -108,7 +134,9 @@ export async function createContext<T extends Node>(node: T, options?: Options &
       'image/svg+xml',
       'image/*',
       '*/*',
-    ].filter(Boolean).join(',')};q=0.8`,
+    ]
+      .filter(Boolean)
+      .join(',')};q=0.8`,
     requests,
     drawImageCount: 0,
     tasks: [],
@@ -116,7 +144,9 @@ export async function createContext<T extends Node>(node: T, options?: Options &
     features,
     isEnable: (key: string): boolean => {
       if (key === 'restoreScrollPosition') {
-        return typeof features === 'boolean' ? false : (features as any)[key] ?? false
+        return typeof features === 'boolean'
+          ? false
+          : (features as any)[key] ?? false
       }
       if (typeof features === 'boolean') {
         return features
@@ -127,7 +157,10 @@ export async function createContext<T extends Node>(node: T, options?: Options &
   }
 
   context.log.time('wait until load')
-  await waitUntilLoad(node, { timeout: context.timeout, onWarn: context.log.warn })
+  await waitUntilLoad(node, {
+    timeout: context.timeout,
+    onWarn: context.log.warn,
+  })
   context.log.timeEnd('wait until load')
 
   const { width, height } = resolveBoundingBox(node, context)
@@ -137,7 +170,9 @@ export async function createContext<T extends Node>(node: T, options?: Options &
   return context
 }
 
-export function createStyleElement(ownerDocument?: Document): HTMLStyleElement | undefined {
+export function createStyleElement(
+  ownerDocument?: Document,
+): HTMLStyleElement | undefined {
   if (!ownerDocument)
     return undefined
   const style = ownerDocument.createElement('style')
@@ -151,21 +186,18 @@ export function createStyleElement(ownerDocument?: Document): HTMLStyleElement |
   return style
 }
 
-function resolveBoundingBox(node: Node, context: Context): { width: number, height: number } {
+function resolveBoundingBox(
+  node: Node,
+  context: Context,
+): { width: number, height: number } {
   let { width, height } = context
 
   if (isElementNode(node) && (!width || !height)) {
     const box = node.getBoundingClientRect()
 
-    width = width
-    || box.width
-    || Number(node.getAttribute('width'))
-    || 0
+    width = width || box.width || Number(node.getAttribute('width')) || 0
 
-    height = height
-    || box.height
-    || Number(node.getAttribute('height'))
-    || 0
+    height = height || box.height || Number(node.getAttribute('height')) || 0
   }
 
   return { width, height }

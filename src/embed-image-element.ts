@@ -1,6 +1,12 @@
 import type { Context } from './context'
 import { contextFetch } from './fetch'
-import { IN_FIREFOX, IN_SAFARI, isDataUrl, isImageElement, isSVGElementNode } from './utils'
+import {
+  IN_FIREFOX,
+  IN_SAFARI,
+  isDataUrl,
+  isImageElement,
+  isSVGElementNode,
+} from './utils'
 
 export function embedImageElement<T extends HTMLImageElement | SVGImageElement>(
   cloned: T,
@@ -10,6 +16,10 @@ export function embedImageElement<T extends HTMLImageElement | SVGImageElement>(
     const originalSrc = cloned.currentSrc || cloned.src
 
     if (!isDataUrl(originalSrc)) {
+      // Skip embedding if embedImages is disabled
+      if (!context.embedImages) {
+        return []
+      }
       return [
         contextFetch(context, {
           url: originalSrc,
@@ -32,6 +42,12 @@ export function embedImageElement<T extends HTMLImageElement | SVGImageElement>(
   }
   else if (isSVGElementNode(cloned) && !isDataUrl(cloned.href.baseVal)) {
     const originalSrc = cloned.href.baseVal
+
+    // Skip embedding if embedImages is disabled
+    if (!context.embedImages) {
+      return []
+    }
+
     return [
       contextFetch(context, {
         url: originalSrc,
